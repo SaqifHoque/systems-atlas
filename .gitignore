@@ -1,0 +1,14 @@
+# Dependencies and generated output
+node_modules/
+.nuxt/
+.output/
+dist/
+coverage/
+
+# Local configuration
+.env
+.env.*
+!.env.example
+.vercel/
+.DS_Store
+*.log
