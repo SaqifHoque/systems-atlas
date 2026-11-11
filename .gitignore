@@ -12,3 +12,7 @@ coverage/
 .vercel/
 .DS_Store
 *.log
+
+# Browser test output
+playwright-report/
+test-results/
