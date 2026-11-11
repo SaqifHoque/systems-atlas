@@ -1,0 +1,23 @@
+:root { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #203e31; background: #f6f7f2; font-synthesis: none; -webkit-font-smoothing: antialiased; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+a { color: inherit; text-underline-offset: 4px; }
+a:focus-visible { outline: 3px solid #19634d; outline-offset: 6px; border-radius: 3px; }
+.atlas { max-width: 1120px; margin: auto; padding: 0 48px; }
+.masthead { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 28px 0; border-bottom: 1px solid #dce2d6; }
+.brand { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; font-size: 20px; font-weight: 650; letter-spacing: -.6px; color: #19634d; }
+.brand svg { width: 36px; height: 36px; }
+.edition, .eyebrow, figcaption { font-size: 10px; letter-spacing: 2px; font-weight: 650; }
+.edition { color: #586c60; }
+.intro { padding: 84px 0 48px; max-width: 650px; }
+.eyebrow { color: #47705c; margin: 0 0 22px; }
+h1 { font-size: clamp(44px, 7vw, 76px); font-weight: 550; letter-spacing: -3px; line-height: 1.06; margin: 0 0 24px; }
+.lead { max-width: 500px; color: #586c60; font-size: 17px; line-height: 1.75; }
+.status { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #47614f; margin-top: 28px; }
+.status span { width: 7px; height: 7px; border-radius: 50%; background: #61824c; flex-shrink: 0; }
+.request-map { margin: 10px 0 64px; padding: 28px 32px 24px; border: 1px solid #d7dfd0; border-radius: 18px; background: #edf1e6; }
+figcaption { color: #516647; }
+.request-map svg { display: block; width: 100%; max-width: 850px; margin: 14px auto 0; }
+.request-map p { font-size: 12px; color: #586c60; text-align: center; line-height: 1.6; margin-bottom: 0; }
+footer { border-top: 1px solid #dce2d6; padding: 24px 0; display: flex; justify-content: space-between; gap: 20px; font-size: 11px; color: #586c60; }
+@media (max-width: 600px) { .atlas { padding: 0 22px; } .masthead { padding: 22px 0; } .edition { display: none; } .intro { padding: 56px 0 36px; } h1 { letter-spacing: -2px; } .lead { font-size: 15px; } .request-map { padding: 22px 12px; margin-bottom: 40px; } figcaption { font-size: 9px; letter-spacing: 1px; } footer { flex-direction: column; gap: 12px; } }
