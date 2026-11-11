@@ -58,7 +58,11 @@ npm start
 
 ## Project structure
 
-- `app/app.vue` — branded starter screen.
+- `app/app.vue` — shared application shell.
+- `app/pages/` — the learning map and lesson reader.
+- `app/components/` — accessible learning tree and preview.
+- `app/composables/` — hydration-safe progress restoration.
+- `shared/` — original curriculum, types, and progression rules.
 - `app/assets/css/main.css` — responsive application styles.
 - `public/` — assets served as-is.
 - `server/api/` — Nitro server routes.
@@ -72,6 +76,28 @@ Deploy as a Nuxt **server application**, with `npm ci` as the install command an
 
 For platforms with a dedicated Nitro adapter, use that adapter rather than uploading the Node server output. Do not use a static export: `/api/health` and future lesson and simulation routes require a server.
 
+## Learning map and reading lessons
+
+The home screen shows eight original lessons across four levels. Desktop uses an SVG prerequisite map; mobile uses a stacked roadmap with explicit prerequisite links. Select a lesson to see its goals, prerequisites, estimated time, and Start or Resume action. Advanced lessons are previewable, and their prerequisites link back to the map.
+
+The recommendation follows prerequisite order and prioritizes an unfinished lesson already started. A reading lesson follows the user experience, request path, and a design trade-off, ending with a prediction checkpoint and a primary source. Correct predictions allow completion and reveal the next recommended lesson.
+
+Progress is stored under `systems-atlas:progress:v1` only after the client mounts. Unknown IDs, malformed data, and completions without prerequisites are discarded during restore. If browser storage is blocked, progress still works in memory for the current visit. Clearing site storage resets the expedition. Progress is local to one browser, without cross-tab or cross-device synchronization.
+
+`GET /api/lessons` returns the bundled curriculum. `GET /api/lessons/:id` returns one lesson or HTTP 404. No external service is called at runtime.
+
+## Verification
+
+```sh
+npm test
+npm run typecheck
+npm run build
+npx playwright install chromium
+npm run test:e2e
+```
+
+The browser suite starts the production server on `127.0.0.1:3218`; leave that port available. It checks the same learning journey on desktop and an emulated mobile viewport, including prerequisite navigation, keyboard activation, checkpoint feedback, resume, reload persistence, blocked storage, and unknown lesson IDs. It uses Chromium for both viewport projects.
+
 ## Status
 
-The Nuxt 4 and TypeScript scaffold includes a responsive starter screen and a server health endpoint. The curriculum, skill tree, learning simulations, checkpoints, and progress storage are planned and are not implemented in this setup PR.
+This edition includes the learning map, lesson previews, reading lessons, prediction checkpoints, and saved progress. Interactive product screens, request animations, component inspection, and deterministic failure simulations will follow in a separate PR. Time estimates are reading estimates, not measured simulation metrics.
