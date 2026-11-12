@@ -28,7 +28,7 @@ useHead({ title: 'Your learning map — Systems Atlas' })
         <LearningTree :curriculum="curriculum" :selected="selectedId" :status="status" @select="select" />
         <aside v-if="selected" class="preview-column"><LessonPreview :lesson="selected" :curriculum="curriculum" :completed="progress.completed" :status="status(selected)" :ready="ready" @select="select" /><button class="text-button back-map" @click="backToMap">↑ Back to the learning map</button></aside>
       </div>
-      <p class="scope-note">This edition includes reading lessons and prediction checkpoints. Interactive product simulations are coming in a later release.</p>
+      <p class="scope-note">Learn by doing: every lesson includes a product lab, a request trace, a failure to explore, and a prediction checkpoint. All labs are simulations.</p>
     </template>
   </main>
 </template>
