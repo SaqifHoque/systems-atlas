@@ -85,6 +85,17 @@ test('recommended path reaches every level and finishes the atlas', async ({ pag
   await page.locator('.next-card').getByRole('link', { name: 'Start lesson' }).click()
   for (const lesson of curriculum) {
     await expect(page.getByRole('heading', { level: 1, name: lesson.title, exact: true })).toBeVisible()
+    const action = lesson.lab === 'request' ? 'Load collection' : lesson.lab === 'shortener' ? 'Shorten URL' : lesson.lab === 'notifications' ? 'Send notification' : 'Pay $49.00'
+    const failure = lesson.lab === 'request' || lesson.lab === 'shortener' ? 'database-down' : lesson.lab === 'notifications' ? 'worker-down' : lesson.lab === 'payment' ? 'timeout' : lesson.id === 'replication' ? 'leader-down' : 'partition'
+    for (const scenario of ['normal', failure]) {
+      await page.getByLabel('Scenario', { exact: true }).selectOption(scenario)
+      await page.getByRole('button', { name: action }).click()
+      await expect(page.locator('.simulation-lab')).toHaveAttribute('aria-busy', 'false')
+      await expect(page.locator('.event-list')).toBeVisible()
+      await page.locator('.event-list button').last().click()
+    }
+    await expect(page.getByText('✓ Normal flow explored')).toBeVisible()
+    await expect(page.getByText('✓ Failure scenario explored')).toBeVisible()
     await page.getByRole('radio').nth(lesson.answer).check()
     await page.getByRole('button', { name: 'Check prediction' }).click()
     await page.getByRole('button', { name: 'Complete lesson' }).click()
