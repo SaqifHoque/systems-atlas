@@ -16,3 +16,6 @@ coverage/
 # Browser test output
 playwright-report/
 test-results/
+
+# Release archives
+artifacts/
