@@ -11,6 +11,7 @@ const lesson = lessonData as Ref<Lesson>
 const { ready, progress, next, storageError, start, complete, available } = useLearningProgress(curriculum)
 const choice = ref<number | null>(null)
 const checked = ref(false)
+const explored = ref({ normal: false, failure: false })
 const passed = computed(() => checked.value && choice.value === lesson.value.answer)
 const finished = computed(() => progress.value.completed.includes(lesson.value.id))
 watch(ready, (value) => { if (value) start(lesson.value) }, { immediate: true })
@@ -25,7 +26,10 @@ useHead({ title: `${lesson.value.title} — Systems Atlas` })
     <header class="lesson-heading"><p class="eyebrow">{{ lesson.level }} / {{ lesson.track }} / {{ lesson.minutes }} MIN</p><h1>{{ lesson.title }}</h1><p class="lead">{{ lesson.subtitle }}</p></header>
     <p v-if="!ready" role="status">Restoring your progress…</p>
     <section v-else-if="!available(lesson)" class="prerequisite-gate" aria-labelledby="gate-title"><h2 id="gate-title">A few stepping stones first</h2><p>You can preview this topic on the map. Complete these prerequisites to start:</p><ul><li v-for="id in lesson.prerequisites.filter(id => !progress.completed.includes(id))" :key="id"><NuxtLink :to="`/lessons/${id}`">{{ curriculum.find(item => item.id === id)?.title }}</NuxtLink></li></ul></section>
-    <div v-else class="lesson-content">
+    <template v-else>
+      <LabSimulationLab :lesson="lesson" @explored="kind => explored[kind] = true" />
+      <p class="lab-explored"><span>{{ explored.normal ? '✓ Normal flow explored' : 'Try the normal flow' }}</span><span>{{ explored.failure ? '✓ Failure scenario explored' : 'Then try a failure scenario' }}</span></p>
+      <div class="lesson-content">
       <p v-if="storageError" role="status" class="preview-note">Browser storage is unavailable. Your progress will last for this visit.</p>
       <section><span class="reading-step">01</span><h2>What the user sees</h2><p>{{ lesson.story }}</p></section>
       <section><span class="reading-step">02</span><h2>Follow the request</h2><p>{{ lesson.trace }}</p></section>
@@ -43,6 +47,7 @@ useHead({ title: `${lesson.value.title} — Systems Atlas` })
         <div v-else role="status"><p class="completion-label">✓ Lesson completed</p><template v-if="next"><p class="eyebrow">UP NEXT</p><h2>{{ next.title }}</h2><p>{{ next.reason }}</p><NuxtLink class="button primary" :to="`/lessons/${next.id}`">Continue to next lesson ↗</NuxtLink></template><template v-else><h2>You’ve completed the atlas.</h2><NuxtLink class="button primary" to="/">Return to your learning map ↗</NuxtLink></template></div>
         <p v-if="!finished && !passed" class="muted">Answer the prediction correctly to complete this lesson.</p>
       </div>
-    </div>
+      </div>
+    </template>
   </main>
 </template>

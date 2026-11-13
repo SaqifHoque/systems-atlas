@@ -62,7 +62,7 @@ npm start
 - `app/pages/` — the learning map and lesson reader.
 - `app/components/` — accessible learning tree and preview.
 - `app/composables/` — hydration-safe progress restoration.
-- `shared/` — original curriculum, types, and progression rules.
+- `shared/` — original curriculum, progression rules, and deterministic simulation models.
 - `app/assets/css/main.css` — responsive application styles.
 - `public/` — assets served as-is.
 - `server/api/` — Nitro server routes.
@@ -74,13 +74,13 @@ Nuxt generates the application, server, shared, and tooling TypeScript configura
 
 Deploy as a Nuxt **server application**, with `npm ci` as the install command and `npm run build` as the build command. For a Node.js host, start with `npm start`; Nitro creates `.output/server/index.mjs` and serves the bundled public assets. Ensure the hosting platform uses a compatible Node.js version.
 
-For platforms with a dedicated Nitro adapter, use that adapter rather than uploading the Node server output. Do not use a static export: `/api/health` and future lesson and simulation routes require a server.
+For platforms with a dedicated Nitro adapter, use that adapter rather than uploading the Node server output. Do not use a static export: `/api/health`, `/api/lessons`, and `/api/simulate` require a server.
 
-## Learning map and reading lessons
+## Learning map and interactive lessons
 
 The home screen shows eight original lessons across four levels. Desktop uses an SVG prerequisite map; mobile uses a stacked roadmap with explicit prerequisite links. Select a lesson to see its goals, prerequisites, estimated time, and Start or Resume action. Advanced lessons are previewable, and their prerequisites link back to the map.
 
-The recommendation follows prerequisite order and prioritizes an unfinished lesson already started. A reading lesson follows the user experience, request path, and a design trade-off, ending with a prediction checkpoint and a primary source. Correct predictions allow completion and reveal the next recommended lesson.
+The recommendation follows prerequisite order and prioritizes an unfinished lesson already started. Each lesson pairs a usable product screen with an inspectable SVG architecture diagram, then explains the user experience, request path, and a design trade-off before a prediction checkpoint and a primary source. Correct predictions allow completion and reveal the next recommended lesson.
 
 Progress is stored under `systems-atlas:progress:v1` only after the client mounts. Unknown IDs, malformed data, and completions without prerequisites are discarded during restore. If browser storage is blocked, progress still works in memory for the current visit. Clearing site storage resets the expedition. Progress is local to one browser, without cross-tab or cross-device synchronization.
 
@@ -96,8 +96,24 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-The browser suite starts the production server on `127.0.0.1:3218`; leave that port available. It checks the same learning journey on desktop and an emulated mobile viewport, including prerequisite navigation, keyboard activation, checkpoint feedback, resume, reload persistence, blocked storage, and unknown lesson IDs. It uses Chromium for both viewport projects.
+The browser suite starts the production server on `127.0.0.1:3218`; leave that port available. It checks the learning journey and labs on desktop and an emulated mobile viewport: prerequisite navigation, keyboard activation, checkpoints, reload persistence, blocked storage, unknown IDs, cache outcomes, notification retries, payment idempotency, failover, and both partition policies. It uses Chromium for both viewport projects. Simulations are stepped manually in most tests to avoid wall-clock waits; a separate check verifies automatic request animation.
+
+## Product labs
+
+- **Request:** Load a book collection through browser → API → database. Trigger a database timeout and compare simulated latency with the normal flow. The throughput illustration assumes one sequential worker with no overhead.
+- **Shortener:** Create a mapping using one API and database. The cache lesson adds cache-aside reads: a miss fills the cache, a hit skips the database, and an expired key refills from the durable mapping.
+- **Notifications:** Commit a notification and outbox record, relay to a queue, and process a job. An offline worker leaves work queued. A lost acknowledgment causes redelivery; the processed-ID record prevents another visible message in this model.
+- **Payment:** A response timeout leaves one recorded charge. Retry the same purchase with `checkout-atlas-001` to retrieve its recorded result. Inspect the charge count and trace; replay does not execute another request.
+- **Regions:** Confirm a remote replica before acknowledging an order. A modeled safe failover recovers that order after the leader fails. During a partition, compare zero confirmed orders with paused writes against two accepted orders for one item with independent writes.
+
+Every action uses `POST /api/simulate`, validated against the lesson’s supported actions and scenarios. It returns deterministic events with component-to-component edges, state snapshots, product outcomes, illustrative metrics, and explicit assumptions. Submitted URLs are parsed but never fetched or opened. No module-level mutable server state is used.
+
+Desktop shows the product and architecture together. Mobile uses linked Product and Architecture tabs with arrow-key navigation. Pause, play, previous/next event, and replay all operate on the existing trace. Component buttons explain their job, failure mode, and design purpose. Reduced-motion preferences disable request packets and default to manual stepping.
+
+Simulation state is ephemeral, supplied by the browser, and untrusted; it is not a real payment ledger or a production consistency implementation. A reload resets the lab while retaining lesson progress. Reset lab discards the current experiment. Regional scenario/policy changes begin a fresh comparison, except Leader fails retains the previously confirmed order for failover. Inputs and record counts are bounded; reset after reaching a limit.
+
+Assumptions include atomic payment/result recording, atomic notification effect/deduplication in the toy consumer, and an external safe election/fencing decision for failover. Real delivery providers and replicated systems need those guarantees implemented explicitly. Simulated flow time sums illustrative event durations; animation pacing and background delivery time are separate from HTTP acceptance latency.
 
 ## Status
 
-This edition includes the learning map, lesson previews, reading lessons, prediction checkpoints, and saved progress. Interactive product screens, request animations, component inspection, and deterministic failure simulations will follow in a separate PR. Time estimates are reading estimates, not measured simulation metrics.
+The app includes the prerequisite map, lesson previews, interactive product labs, animated request tracing, component inspection, normal and failure cases, prediction checkpoints, and saved learning progress. Deployment to a hosted Nuxt server remains a separate release task. No accounts, database, external API keys, payments, or email delivery are required.
