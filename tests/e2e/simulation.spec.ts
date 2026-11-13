@@ -39,7 +39,7 @@ test('beginner starts at tree, traces a request and failure, answers and continu
   await expect(page.getByRole('heading', { level: 1, name: 'Your first system' })).toBeVisible()
   await page.reload()
   await page.getByRole('link', { name: 'Back to your learning map' }).click()
-  await expect(page.getByRole('button', { name: /^Start here:/ })).toContainText('Completed')
+  await expect(page.getByRole('button', { name: /Start here/i })).toContainText('Completed')
 })
 
 test('cache lab shows miss, hit, expired key and a visible database outage', async ({ page, request }) => {

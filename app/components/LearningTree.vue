@@ -23,7 +23,7 @@ const edges = computed(() => props.curriculum.flatMap(lesson => lesson.prerequis
       </svg>
       <ol class="tree-nodes">
         <li v-for="(lesson, index) in curriculum" :key="lesson.id" :style="{ '--x': `${lesson.x}%`, '--y': `${lesson.y}%` }">
-          <button :class="['lesson-node', status(lesson), { selected: selected === lesson.id }]" :aria-pressed="selected === lesson.id" :aria-label="`${index === 0 ? 'Start here: ' : ''}${lesson.title}, ${lesson.level}, ${labels[status(lesson)]}`" @click="emit('select', lesson.id)">
+          <button :class="['lesson-node', status(lesson), { selected: selected === lesson.id }]" :aria-pressed="selected === lesson.id" @click="emit('select', lesson.id)">
             <span v-if="index === 0" class="start-label">START HERE</span>
             <span class="node-top"><span class="node-number">{{ String(index + 1).padStart(2, '0') }} / {{ lesson.level }}</span><span aria-hidden="true">{{ status(lesson) === 'completed' ? '✓' : lesson.icon }}</span></span>
             <strong>{{ lesson.title }}</strong>
