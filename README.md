@@ -46,7 +46,7 @@ Open the local URL printed by Nuxt, usually `http://localhost:3000`.
 
 ```sh
 npm run typecheck
-npm run build
+npm run build:server
 npm start
 ```
 
@@ -72,9 +72,11 @@ Nuxt generates the application, server, shared, and tooling TypeScript configura
 
 ## Deployment
 
-Deploy as a Nuxt **server application**, with `npm ci` as the install command and `npm run build` as the build command. For a Node.js host, start with `npm start`; Nitro creates `.output/server/index.mjs` and serves the bundled public assets. Ensure the hosting platform uses a compatible Node.js version.
+Deploy as a Nuxt **server application**, with `npm ci` as the install command. For a generic Node host, use `npm run build:server` to explicitly select the Node server preset. For a Node.js host, start with `npm start`; Nitro creates `.output/server/index.mjs` and serves the bundled public assets. Ensure the hosting platform uses a compatible Node.js version.
 
-For platforms with a dedicated Nitro adapter, use that adapter rather than uploading the Node server output. Do not use a static export: `/api/health`, `/api/lessons`, and `/api/simulate` require a server.
+For platforms with a dedicated Nitro adapter, use `npm run build` with that adapter rather than uploading the Node server output. Do not use a static export: `/api/health`, `/api/lessons`, and `/api/simulate` require a server.
+
+For standalone server archives, container startup, CI checks, and rollback, see [the release runbook](docs/RELEASE.md).
 
 ## Learning map and interactive lessons
 
@@ -91,7 +93,9 @@ Progress is stored under `systems-atlas:progress:v1` only after the client mount
 ```sh
 npm test
 npm run typecheck
-npm run build
+npm run build:server
+npm run package:server
+npm run smoke
 npx playwright install chromium
 npm run test:e2e
 ```
@@ -116,4 +120,4 @@ Assumptions include atomic payment/result recording, atomic notification effect/
 
 ## Status
 
-The app includes the prerequisite map, lesson previews, interactive product labs, animated request tracing, component inspection, normal and failure cases, prediction checkpoints, and saved learning progress. Deployment to a hosted Nuxt server remains a separate release task. No accounts, database, external API keys, payments, or email delivery are required.
+The app includes the prerequisite map, lesson previews, interactive product labs, animated request tracing, component inspection, normal and failure cases, prediction checkpoints, and saved learning progress. The release workflow checks standalone server packaging, browser journeys, automated accessibility, and container startup; hosting publication remains a separate release task. No accounts, database, external API keys, payments, or email delivery are required.
