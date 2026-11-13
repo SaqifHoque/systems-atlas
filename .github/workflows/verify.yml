@@ -1,0 +1,81 @@
+name: Verify release
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Application and browser checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      NUXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run typecheck
+      - run: npm run build:server
+      - run: npm run package:server
+      - name: Test extracted standalone archive
+        run: npm run smoke
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - name: Retain browser results
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: browser-results
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Retain verified server package
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: nuxt-node-server
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 7
+
+  container:
+    name: Container startup and API checks
+    needs: verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      ATLAS_PORT: '3219'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+      - run: docker compose up --build --detach --wait --wait-timeout 120
+      - name: Exercise the container server
+        run: npm run smoke
+        env:
+          SMOKE_URL: http://127.0.0.1:3219
+      - name: Show container logs
+        if: ${{ failure() }}
+        run: docker compose logs --no-color
+      - name: Stop container
+        if: ${{ always() }}
+        run: docker compose down
