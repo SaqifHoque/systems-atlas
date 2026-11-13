@@ -1,0 +1,15 @@
+.git
+.github
+node_modules
+.nuxt
+.output
+artifacts
+playwright-report
+test-results
+.env
+.env.*
+.aws
+.codex
+.agents
+.DS_Store
+*.log
