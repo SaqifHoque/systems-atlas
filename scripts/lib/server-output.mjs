@@ -9,6 +9,10 @@ export async function assertServerOutput(output) {
   } catch {
     throw new Error('Missing Node server output. Run npm run build:server first.')
   }
+  await assertInternalSymlinks(output)
+}
+
+export async function assertInternalSymlinks(output) {
   const root = await realpath(output)
   async function visit(directory) {
     for (const entry of await readdir(directory)) {

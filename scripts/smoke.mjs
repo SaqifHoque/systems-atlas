@@ -2,11 +2,12 @@ import assert from 'node:assert/strict'
 import { execFileSync, spawn } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { once } from 'node:events'
-import { mkdtemp, readFile, rm } from 'node:fs/promises'
+import { cp, mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { assertServerOutput } from './lib/server-output.mjs'
+import { assertVercelOutput } from './lib/vercel-output.mjs'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
 let directory, server
@@ -15,24 +16,33 @@ process.once('SIGINT', terminate)
 process.once('SIGTERM', terminate)
 try {
   let base
+  let command = ['.output/server/index.mjs']
   if (process.env.SMOKE_URL) {
     base = new URL(process.env.SMOKE_URL)
     assert.ok(['http:', 'https:'].includes(base.protocol), 'SMOKE_URL must use HTTP or HTTPS')
     assert.ok(!base.username && !base.password && !base.search && !base.hash, 'SMOKE_URL must not contain credentials, queries, or fragments')
     if (!base.pathname.endsWith('/')) base.pathname += '/'
   } else {
-    const archive = join(root, 'artifacts/systems-atlas-server.tar.gz')
-    const expected = (await readFile(`${archive}.sha256`, 'utf8')).trim().split(/\s+/)[0]
-    const actual = createHash('sha256').update(await readFile(archive)).digest('hex')
-    assert.equal(actual, expected, 'Server archive checksum mismatch')
-    directory = await mkdtemp(join(tmpdir(), 'systems-atlas-release-'))
-    execFileSync('tar', ['-xzf', archive, '-C', directory])
-    await assertServerOutput(join(directory, '.output'))
-    const env = { ...process.env, NODE_ENV: 'production', NITRO_HOST: '127.0.0.1', NITRO_PORT: '0', NUXT_APP_BASE_URL: '/' }
+    const vercel = process.argv.includes('--vercel')
+    if (vercel) {
+      directory = await mkdtemp(join(tmpdir(), 'systems-atlas-vercel-'))
+      await cp(join(root, '.vercel/output'), join(directory, 'output'), { recursive: true, verbatimSymlinks: true })
+      await assertVercelOutput(join(directory, 'output'))
+      command = [join(root, 'scripts/serve-vercel.mjs')]
+    } else {
+      const archive = join(root, 'artifacts/systems-atlas-server.tar.gz')
+      const expected = (await readFile(`${archive}.sha256`, 'utf8')).trim().split(/\s+/)[0]
+      const actual = createHash('sha256').update(await readFile(archive)).digest('hex')
+      assert.equal(actual, expected, 'Server archive checksum mismatch')
+      directory = await mkdtemp(join(tmpdir(), 'systems-atlas-release-'))
+      execFileSync('tar', ['-xzf', archive, '-C', directory])
+      await assertServerOutput(join(directory, '.output'))
+    }
+    const env = { ...process.env, ...(vercel ? { VERCEL_OUTPUT_DIR: join(directory, 'output') } : {}), NODE_ENV: 'production', NITRO_HOST: '127.0.0.1', NITRO_PORT: '0', NUXT_APP_BASE_URL: '/' }
     delete env.NITRO_UNIX_SOCKET
     delete env.NITRO_SSL_CERT
     delete env.NITRO_SSL_KEY
-    server = spawn(process.execPath, ['.output/server/index.mjs'], { cwd: directory, env, stdio: ['ignore', 'pipe', 'pipe'] })
+    server = spawn(process.execPath, command, { cwd: directory, env, stdio: ['ignore', 'pipe', 'pipe'] })
     let diagnostics = ''
     server.stderr.on('data', chunk => { diagnostics = (diagnostics + chunk).slice(-4000) })
     base = await new Promise((resolve, reject) => {
