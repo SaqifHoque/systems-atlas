@@ -77,7 +77,9 @@ docker compose down
 
 The `Verify release` workflow runs on pull requests and pushes to `main`. Actions are pinned to commit SHAs and use read-only repository permission. The application job installs from the lockfile, runs unit/type checks, builds and verifies the standalone archive, and runs desktop/mobile browser tests. It retains the server archive only after the checks pass, with reports and failure traces available for seven days.
 
-A second job builds the Docker image, waits for its health check, and runs the same HTTP smoke checks against it. It always stops the container. This workflow verifies and packages; it does not publish a website, push a container image, create a Git tag, or configure branch protection.
+The Vercel adapter job separately verifies generated Node functions and runs the browser suite against them without hosting credentials. See [the Vercel setup guide](VERCEL.md).
+
+The container job builds the Docker image, waits for its health check, and runs the same HTTP smoke checks against it. It always stops the container. This workflow verifies and packages; it does not publish a website, push a container image, create a Git tag, or configure branch protection.
 
 Before shipping, review the exact commit and both CI jobs. Automated WCAG A/AA scans catch common issues in the map, preview, product, architecture tab, and answered-checkpoint states. They complement the keyboard/browser tests; they do not certify full accessibility or replace manual assistive-technology testing. Mobile tests use Chromium emulation rather than Safari.
 

@@ -76,7 +76,7 @@ Deploy as a Nuxt **server application**, with `npm ci` as the install command. F
 
 For platforms with a dedicated Nitro adapter, use `npm run build` with that adapter rather than uploading the Node server output. Do not use a static export: `/api/health`, `/api/lessons`, and `/api/simulate` require a server.
 
-For standalone server archives, container startup, CI checks, and rollback, see [the release runbook](docs/RELEASE.md).
+For Vercel hosting, see [the Vercel setup guide](docs/VERCEL.md). For standalone server archives, container startup, CI checks, and rollback, see [the release runbook](docs/RELEASE.md).
 
 ## Learning map and interactive lessons
 
@@ -120,4 +120,4 @@ Assumptions include atomic payment/result recording, atomic notification effect/
 
 ## Status
 
-The app includes the prerequisite map, lesson previews, interactive product labs, animated request tracing, component inspection, normal and failure cases, prediction checkpoints, and saved learning progress. The release workflow checks standalone server packaging, browser journeys, automated accessibility, and container startup; hosting publication remains a separate release task. No accounts, database, external API keys, payments, or email delivery are required.
+The app includes the prerequisite map, lesson previews, interactive product labs, animated request tracing, component inspection, normal and failure cases, prediction checkpoints, and saved learning progress. The release workflow checks standalone server packaging, browser journeys, automated accessibility, and container startup; Vercel configuration and adapter verification are included; connecting the repository and hosting publication remain separate account operations. No accounts, database, external API keys, payments, or email delivery are required.

@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": "^22.22.3 || ^24.15.0 || >=26.0.0"
+    "node": ">=22.22.3 <23"
   },
   "scripts": {
     "dev": "nuxt dev",
@@ -17,7 +17,10 @@
     "test:e2e": "playwright test",
     "build:server": "nuxt build --preset node-server",
     "package:server": "node scripts/package-server.mjs",
-    "smoke": "node scripts/smoke.mjs"
+    "smoke": "node scripts/smoke.mjs",
+    "build:vercel": "nuxt build --preset vercel",
+    "check:vercel": "node scripts/check-vercel-output.mjs",
+    "smoke:vercel": "node scripts/smoke.mjs --vercel"
   },
   "dependencies": {
     "nuxt": "4.6.4",
